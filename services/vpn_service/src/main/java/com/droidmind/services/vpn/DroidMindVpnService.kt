@@ -53,7 +53,6 @@ class DroidMindVpnService : VpnService(), Runnable {
                     outputStream.write(packet.array(), 0, length)
                     packet.clear()
                 }
-                Thread.sleep(10)
             }
         } catch (e: Exception) {
             e.printStackTrace()

@@ -1,9 +1,9 @@
 # DroidMind OS 🧠
 The Ultimate On-Device AI Operating Layer for Android.
 
-![Android CI](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/ci.yml/badge.svg)
-![Release Build](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/android.yml/badge.svg)
-![Security Scan](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/codeql.yml/badge.svg)
+[![Continuous Integration](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/ci.yml/badge.svg)](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/ci.yml)
+[![Android CI & Release](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/android.yml/badge.svg)](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/android.yml)
+[![CodeQL Security Scan](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/codeql.yml/badge.svg)](https://github.com/abdulraheemnohri/DroidMind-OS/actions/workflows/codeql.yml)
 ![Version](https://img.shields.io/github/v/release/abdulraheemnohri/DroidMind-OS)
 ![Issues](https://img.shields.io/github/issues/abdulraheemnohri/DroidMind-OS)
 ![License](https://img.shields.io/github/license/abdulraheemnohri/DroidMind-OS)
@@ -16,10 +16,12 @@ DroidMind OS is a privacy-first, local AI enhancement layer for Android 12+. It 
 - **Local VPN:** AdBlockerX module for DNS-level domain filtering.
 - **AI Engine:** On-device inference via TFLite (Usage, Anomaly, LLM).
 - **Deep Integration:** Accessibility & Context services for adaptive behavior.
+- **OTA Updates:** Integrated in-app update system.
+- **Widget & Tile:** Home screen widget and Quick Settings tile for quick access.
 
 ## 🛠 DevOps & CI/CD
 - **Auto APK/AAB:** Automated builds on every release.
-- **OTA Updates:** Integrated in-app update system.
+- **AI Code Review:** Automated PR reviews using GPT-4.
 - **Security:** CodeQL and Dependency vulnerability scans.
 - **Version Tracking:** Automatic semantic versioning and changelogs.
 
