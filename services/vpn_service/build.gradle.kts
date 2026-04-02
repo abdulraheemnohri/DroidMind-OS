@@ -24,7 +24,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":modules:adblockerx"))
+    implementation(project(":modules:adshield"))
     implementation(project(":database"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

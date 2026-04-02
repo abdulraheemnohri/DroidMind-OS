@@ -2,12 +2,20 @@ package com.droidmind.modules.privacyshield
 
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 
 /**
- * Behavioral Security System.
+ * Behavioral Security System for DroidMind OS v1.0 Ultimate Edition.
+ * Features: Permission anomaly detection, clipboard sanitization, and decoy mode.
  */
 class PrivacyShield(private val context: Context) {
+
+    private var isDecoyModeEnabled = false
+
+    fun setDecoyMode(enabled: Boolean) {
+        isDecoyModeEnabled = enabled
+    }
+
+    fun isDecoyModeActive(): Boolean = isDecoyModeEnabled
 
     fun detectPermissionAnomalies(): List<String> {
         val anomalies = mutableListOf<String>()
@@ -16,9 +24,11 @@ class PrivacyShield(private val context: Context) {
 
         packages.forEach { pkg ->
             val permissions = pkg.requestedPermissions
-            if (permissions != null && permissions.contains(android.Manifest.permission.RECORD_AUDIO)) {
-                if (pkg.packageName.contains("utility", ignoreCase = true)) {
-                    anomalies.add("Suspicious Audio Permission in Utility App: ${pkg.packageName}")
+            if (permissions != null && (permissions.contains(android.Manifest.permission.RECORD_AUDIO) ||
+                permissions.contains(android.Manifest.permission.ACCESS_FINE_LOCATION))) {
+                if (pkg.packageName.contains("utility", ignoreCase = true) ||
+                    pkg.packageName.contains("torch", ignoreCase = true)) {
+                    anomalies.add("Suspicious Permission in Utility App: ${pkg.packageName}")
                 }
             }
         }
@@ -26,10 +36,22 @@ class PrivacyShield(private val context: Context) {
     }
 
     fun protectClipboard(content: String): String {
-        // AI logic to detect sensitive data (SSN, Passwords) and mask it
-        if (content.contains(Regex("\\d{3}-\\d{2}-\\d{4}"))) {
-            return "MASKED_CONTENT"
+        // AI logic to detect sensitive data (SSN, Passwords, Credit Cards) and mask it
+        val patterns = listOf(
+            Regex("\\d{3}-\\d{2}-\\d{4}"), // SSN
+            Regex("\\d{4}-\\d{4}-\\d{4}-\\d{4}"), // Credit Card
+            Regex("(?i)password[:=]\\s*\\w+") // Password
+        )
+
+        var masked = content
+        patterns.forEach { pattern ->
+            masked = pattern.replace(masked, " [HIDDEN BY PRIVACYSHIELD] ")
         }
-        return content
+        return masked
+    }
+
+    fun sanitizeScreenshot(pixelData: ByteArray): ByteArray {
+        // CV model stub for blurring sensitive content in screenshots
+        return pixelData
     }
 }

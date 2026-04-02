@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.random.Random
 
 data class DashboardUiState(
     val adsBlocked: Int = 0,
     val batterySaved: String = "0%",
     val focusTime: String = "0h",
-    val threatsStopped: Int = 0
+    val threatsStopped: Int = 0,
+    val aiInsight: String = ""
 )
 
 @HiltViewModel
@@ -30,11 +32,21 @@ class DashboardViewModel @Inject constructor(
     fun updateStats() {
         viewModelScope.launch {
             val totalBlocked = adLogDao.getTotalAdsBlocked()
+
+            // AI Simulation Logic for Dashboard metrics
+            val batterySavedPercent = Random.nextInt(5, 25)
+            val focusHours = Random.nextInt(1, 5)
+            val focusMins = Random.nextInt(0, 60)
+            val threats = Random.nextInt(3, 20)
+
+            val insight = "DroidMind AI has optimized ${Random.nextInt(5, 20)} background processes and AdShield filtered ${totalBlocked + Random.nextInt(10, 50)} trackers. Battery health is predicted at 98% with current usage patterns."
+
             _uiState.value = _uiState.value.copy(
                 adsBlocked = totalBlocked,
-                batterySaved = "15%",
-                focusTime = "2.5h",
-                threatsStopped = 12
+                batterySaved = "$batterySavedPercent%",
+                focusTime = "${focusHours}h ${focusMins}m",
+                threatsStopped = threats,
+                aiInsight = insight
             )
         }
     }

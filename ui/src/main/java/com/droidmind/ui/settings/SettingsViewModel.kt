@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 data class SettingsUiState(
     val isPowerForgeEnabled: Boolean = true,
-    val isAdBlockerXEnabled: Boolean = true,
+    val isAdShieldEnabled: Boolean = true,
     val isNetworkNinjaEnabled: Boolean = true,
     val isPrivacyShieldEnabled: Boolean = true,
     val isFocusFlowEnabled: Boolean = true,
@@ -24,8 +24,8 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
         _uiState.value = _uiState.value.copy(isPowerForgeEnabled = enabled)
     }
 
-    fun toggleAdBlockerX(enabled: Boolean) {
-        _uiState.value = _uiState.value.copy(isAdBlockerXEnabled = enabled)
+    fun toggleAdShield(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(isAdShieldEnabled = enabled)
     }
 
     fun setAIPersonality(personality: String) {

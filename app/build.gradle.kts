@@ -58,7 +58,7 @@ dependencies {
     implementation(project(":modules:powerforge"))
     implementation(project(":modules:privacyshield"))
     implementation(project(":modules:networkninja"))
-    implementation(project(":modules:adblockerx"))
+    implementation(project(":modules:adshield"))
     implementation(project(":modules:neuralcache"))
     implementation(project(":modules:storageSage"))
     implementation(project(":modules:focusflow"))
