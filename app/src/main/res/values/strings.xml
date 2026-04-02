@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DroidMind OS</string>
+    <string name="accessibility_service_description">AI-powered accessibility assistant for DroidMind OS.</string>
+</resources>
