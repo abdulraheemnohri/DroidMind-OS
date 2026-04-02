@@ -36,6 +36,11 @@ class UpdateManager(private val context: Context) {
             connection.requestMethod = "GET"
             connection.connectTimeout = 5000
             connection.readTimeout = 5000
+
+            // NOTE: In the current environment, we might not have a real update server.
+            // Returning null gracefully to avoid blocking the app launch.
+            if (updateUrl.contains("example.com")) return@withContext null
+
             connection.connect()
 
             if (connection.responseCode == 200) {

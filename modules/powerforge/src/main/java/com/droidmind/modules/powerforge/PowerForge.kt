@@ -6,10 +6,11 @@ import android.os.BatteryManager
 import android.os.IBinder
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import android.os.PowerManager
 
 /**
  * AI Battery Optimization Module for DroidMind OS v1.0 Ultimate Edition.
- * Features: Predictive hibernation, stepped charging, and signal optimization.
+ * Features: Predictive hibernation, stepped charging, signal optimization, and deep drain analysis.
  */
 class PowerForge : Service() {
 
@@ -28,6 +29,7 @@ class PowerForge : Service() {
         }
 
         applySteppedCharging(level)
+        analyzeBatteryDrain()
     }
 
     private fun predictiveHibernation() {
@@ -54,6 +56,10 @@ class PowerForge : Service() {
         }
     }
 
+    private fun analyzeBatteryDrain() {
+        // Utilizes BATTERY_STATS permission to perform deep analysis of what consumed power (Stub)
+    }
+
     fun signalOptimizer() {
         // AI model to switch between network modes (e.g. 5G/4G/3G) based on signal quality and battery (Stub)
     }
@@ -61,7 +67,8 @@ class PowerForge : Service() {
     fun thermalPredictor(tempCelsius: Int) {
         // AI logic to predict and prevent overheating by throttling CPU (Stub)
         if (tempCelsius > 45) {
-            // Throttling...
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            // Throttling logic...
         }
     }
 
