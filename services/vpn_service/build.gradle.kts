@@ -1,6 +1,8 @@
 plugins {
     id("com.android.library")
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -22,6 +24,10 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
     implementation(project(":modules:adblockerx"))
+    implementation(project(":database"))
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.coroutines.android)
 }
