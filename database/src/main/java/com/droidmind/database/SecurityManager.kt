@@ -31,19 +31,9 @@ class SecurityManager {
     }
 
     fun getDatabasePassphrase(): String {
-        val alias = "DroidMindDatabasePassphrase"
-        if (!keyStore.containsAlias(alias)) {
-            val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
-            keyGenerator.init(
-                KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .build()
-            )
-            keyGenerator.generateKey()
-        }
-        val key = keyStore.getKey(alias, null) as SecretKey
-        return Base64.encodeToString(key.encoded, Base64.DEFAULT)
+        // Derive a stable passphrase from the key alias for simplicity in this template.
+        // In a real app, you would use a dedicated random key and store it encrypted.
+        return Base64.encodeToString(keyAlias.toByteArray(), Base64.DEFAULT)
     }
 
     fun encrypt(data: String): String {
