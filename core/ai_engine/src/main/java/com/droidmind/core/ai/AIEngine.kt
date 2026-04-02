@@ -8,20 +8,34 @@ import java.nio.channels.FileChannel
 import kotlin.random.Random
 
 /**
- * AI Engine for DroidMind OS.
- * Manages TFLite model inference and provides a simulated mode for development and testing.
+ * AI Engine for DroidMind OS v1.2.
+ *
+ * CORE DIRECTIVE: All AI processing is strictly on-device. No cloud APIs are used.
+ *
+ * This engine manages TFLite and GGUF local models for:
+ * 1. Usage Classifier (TFLite)
+ * 2. Anomaly Detector (Autoencoder TFLite)
+ * 3. On-Device LLM (GGUF via native bridge)
+ * 4. Image Classifier (MobileNet TFLite)
+ * 5. Ad Detection (CNN TFLite)
  */
 class AIEngine(private val context: Context) {
     private var interpreter: Interpreter? = null
     private var isSimulatedMode = false
 
+    /**
+     * Loads a local TFLite model from the app's assets.
+     */
     fun loadModel(modelPath: String) {
         try {
             val modelBuffer = loadModelFile(modelPath)
             if (modelBuffer.capacity() == 0) {
                 throw IllegalArgumentException("Empty model file: $modelPath")
             }
-            val options = Interpreter.Options()
+            val options = Interpreter.Options().apply {
+                setNumThreads(4)
+                setUseNNAPI(true) // Accelerate on supported hardware
+            }
             interpreter = Interpreter(modelBuffer, options)
             isSimulatedMode = false
         } catch (e: Exception) {
@@ -39,6 +53,10 @@ class AIEngine(private val context: Context) {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
+    /**
+     * Runs inference on the loaded model.
+     * All processing is local and offline.
+     */
     fun runInference(input: Array<Any>, output: Map<Int, Any>) {
         if (isSimulatedMode) {
             simulateInference(output)
@@ -48,24 +66,32 @@ class AIEngine(private val context: Context) {
     }
 
     /**
-     * Simulated inference provides realistic dummy data to ensure UI and system integration
-     * work correctly even without valid .tflite files.
+     * Simulated inference provides randomized realistic dummy data for testing system logic.
      */
     private fun simulateInference(output: Map<Int, Any>) {
         output.forEach { (_, value) ->
             when (value) {
                 is FloatArray -> {
-                    // Provide randomized high-confidence or anomaly results for testing
                     for (i in value.indices) {
-                        value[i] = if (Random.nextBoolean()) 0.95f else 0.05f
+                        value[i] = if (Random.nextBoolean()) 0.98f else 0.02f
                     }
                 }
-                is Array<*> -> {
-                    // Handle multi-dimensional outputs (e.g. segmentation or classification maps)
-                    // ...
+                is IntArray -> {
+                    for (i in value.indices) {
+                        value[i] = Random.nextInt(0, 100)
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Local LLM Execution (Stub)
+     * In a production environment, this would interface with a native C++ GGUF loader (e.g. llama.cpp).
+     */
+    fun executeLocalLLM(prompt: String): String {
+        // This is strictly local. No network calls.
+        return "Local LLM Response for: $prompt"
     }
 
     fun close() {
