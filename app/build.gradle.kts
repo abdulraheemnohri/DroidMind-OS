@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.droidmind.os"
-        minSdk = 31
+        minSdk = 21
         targetSdk = 34
         versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
         versionName = System.getenv("VERSION_NAME") ?: "0.1.0"
