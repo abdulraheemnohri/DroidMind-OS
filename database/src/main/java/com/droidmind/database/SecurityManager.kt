@@ -8,10 +8,13 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import android.util.Base64
+import android.content.Context
+import java.security.SecureRandom
 
-class SecurityManager {
+class SecurityManager(private val context: Context) {
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
     private val keyAlias = "DroidMindMasterKey"
+    private val prefs = context.getSharedPreferences("droidmind_security", Context.MODE_PRIVATE)
 
     init {
         if (!keyStore.containsAlias(keyAlias)) {
@@ -31,9 +34,22 @@ class SecurityManager {
     }
 
     fun getDatabasePassphrase(): String {
-        // Derive a stable passphrase from the key alias for simplicity in this template.
-        // In a real app, you would use a dedicated random key and store it encrypted.
-        return Base64.encodeToString(keyAlias.toByteArray(), Base64.DEFAULT)
+        val encryptedPass = prefs.getString("db_pass", null)
+        return if (encryptedPass == null) {
+            val newPass = generateSecurePassphrase()
+            val encrypted = encrypt(newPass)
+            prefs.edit().putString("db_pass", encrypted).apply()
+            newPass
+        } else {
+            decrypt(encryptedPass)
+        }
+    }
+
+    private fun generateSecurePassphrase(): String {
+        val random = SecureRandom()
+        val bytes = ByteArray(32)
+        random.nextBytes(bytes)
+        return Base64.encodeToString(bytes, Base64.DEFAULT)
     }
 
     fun encrypt(data: String): String {
