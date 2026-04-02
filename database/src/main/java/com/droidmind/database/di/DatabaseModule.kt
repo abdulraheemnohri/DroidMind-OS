@@ -16,8 +16,8 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideSecurityManager(): SecurityManager {
-        return SecurityManager()
+    fun provideSecurityManager(@ApplicationContext context: Context): SecurityManager {
+        return SecurityManager(context)
     }
 
     @Provides

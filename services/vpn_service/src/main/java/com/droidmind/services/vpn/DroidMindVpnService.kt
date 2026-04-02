@@ -28,10 +28,21 @@ class DroidMindVpnService : VpnService(), Runnable {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (vpnThread == null) {
+            loadBlockingData()
             vpnThread = Thread(this, "DroidMindVpnThread")
             vpnThread?.start()
         }
         return START_STICKY
+    }
+
+    private fun loadBlockingData() {
+        try {
+            assets.open("ad_hosts.txt").use { input ->
+                adBlocker.loadHosts(input)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onDestroy() {
@@ -56,14 +67,18 @@ class DroidMindVpnService : VpnService(), Runnable {
             while (!Thread.interrupted()) {
                 val length = inputStream.read(packet.array())
                 if (length > 0) {
+                    // NOTE: This is a blueprint implementation.
+                    // For production, packets must be forwarded to a backend socket.
+
                     if (isDnsPacket(packet, length)) {
                         val domain = extractDomain(packet, length)
-                        if (adBlocker.isDomainBlocked(domain)) {
+                        if (domain != null && adBlocker.isDomainBlocked(domain)) {
                             logBlockedAd(domain)
                             packet.clear()
-                            continue
+                            continue // Drop blocked DNS query
                         }
                     }
+
                     outputStream.write(packet.array(), 0, length)
                     packet.clear()
                 }
@@ -83,10 +98,25 @@ class DroidMindVpnService : VpnService(), Runnable {
         return destPort == 53
     }
 
-    private fun extractDomain(packet: ByteBuffer, length: Int): String {
-        // Placeholder for DNS QNAME extractor
-        // In a full implementation, we'd parse the DNS header and question section
-        return "doubleclick.net"
+    private fun extractDomain(packet: ByteBuffer, length: Int): String? {
+        try {
+            var pos = 28 + 12 // Skip IP/UDP headers and DNS fixed header
+            val domain = StringBuilder()
+
+            while (pos < length) {
+                val labelLength = packet.get(pos).toInt() and 0xFF
+                if (labelLength == 0) break
+                pos++
+                for (i in 0 until labelLength) {
+                    domain.append(packet.get(pos).toInt().toChar())
+                    pos++
+                }
+                domain.append(".")
+            }
+            return if (domain.isNotEmpty()) domain.toString().removeSuffix(".") else null
+        } catch (e: Exception) {
+            return null
+        }
     }
 
     private fun logBlockedAd(domain: String) {

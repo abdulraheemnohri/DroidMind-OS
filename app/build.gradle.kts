@@ -62,6 +62,8 @@ dependencies {
     implementation(project(":modules:neuralcache"))
     implementation(project(":modules:storageSage"))
     implementation(project(":modules:focusflow"))
+    implementation(project(":modules:socialsync"))
+    implementation(project(":modules:devdock"))
     implementation(project(":services:vpn_service"))
     implementation(project(":services:accessibility_service"))
     implementation(project(":services:automation_engine"))

@@ -42,8 +42,7 @@ class MainActivity : ComponentActivity() {
                         actionLabel = "Download"
                     )
                     if (result == SnackbarResult.ActionPerformed) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(updateInfo.downloadUrl))
-                        startActivity(intent)
+                        updateManager.downloadAndInstall(updateInfo)
                     }
                 }
             }
