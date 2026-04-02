@@ -30,10 +30,10 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
 
         SettingsSection(title = "Privacy & Security", icon = Icons.Default.Security) {
             ToggleItem(
-                label = "AdBlockerX",
+                label = "AdShield",
                 description = "System-wide DNS ad and tracker blocking",
-                checked = uiState.isAdBlockerXEnabled
-            ) { viewModel.toggleAdBlockerX(it) }
+                checked = uiState.isAdShieldEnabled
+            ) { viewModel.toggleAdShield(it) }
 
             ToggleItem(
                 label = "PrivacyShield",

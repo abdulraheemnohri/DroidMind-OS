@@ -12,8 +12,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class UpdateManager(private val context: Context) {
-    // In a real app, this would be fetched from BuildConfig or a RemoteConfig service
-    private var updateUrl = "https://abdulraheemnohri.github.io/DroidMind-OS/update.json"
+    /**
+     * Default update URL. For production, this should be moved to BuildConfig or a RemoteConfig service.
+     * To change the update source, use [setUpdateUrl].
+     */
+    private var updateUrl = "https://example.com/DroidMind-OS/update.json"
 
     fun setUpdateUrl(url: String) {
         updateUrl = url

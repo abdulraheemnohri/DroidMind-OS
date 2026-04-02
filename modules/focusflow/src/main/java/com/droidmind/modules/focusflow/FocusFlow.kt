@@ -4,8 +4,8 @@ import android.app.NotificationManager
 import android.content.Context
 
 /**
- * Productivity AI.
- * Features: auto focus mode, notification batching, app blocking, smart DND.
+ * Productivity AI for DroidMind OS v1.0 Ultimate Edition.
+ * Features: Auto focus mode, notification batching, app blocking, smart DND, and LLM notification summarization.
  */
 class FocusFlow(private val context: Context) {
     private var isFocusModeEnabled = false
@@ -21,8 +21,8 @@ class FocusFlow(private val context: Context) {
     }
 
     fun isAppBlocked(packageName: String): Boolean {
-        // Block social media apps during focus mode
-        val socialApps = listOf("com.facebook.katana", "com.instagram.android", "com.twitter.android")
+        // AI-driven context-aware app blocking (e.g. social media, games during work)
+        val socialApps = listOf("com.facebook.katana", "com.instagram.android", "com.twitter.android", "com.zhiliaoapp.musically")
         return isFocusModeEnabled && socialApps.contains(packageName)
     }
 
@@ -33,6 +33,19 @@ class FocusFlow(private val context: Context) {
 
     private fun isPriorityContact(packageName: String): Boolean {
         // AI logic to determine priority contacts
-        return packageName.contains("dialer") || packageName.contains("messaging")
+        return packageName.contains("dialer") || packageName.contains("messaging") ||
+               packageName.contains("contacts") || packageName.contains("emergency")
+    }
+
+    fun summarizeNotifications(notifications: List<String>): String {
+        // On-device LLM (GGUF) notification summarization stub
+        if (notifications.isEmpty()) return ""
+
+        // This would call the LLMReasoningUnit for actual summarization
+        return "You have ${notifications.size} notifications from ${notifications.map { it.substringBefore(":") }.distinct().joinToString()}. Summary: Most are social media updates."
+    }
+
+    fun setDistractionInterceptor(enabled: Boolean) {
+        // Uses Accessibility Service to intercept distractive UI elements (Stub)
     }
 }

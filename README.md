@@ -13,7 +13,7 @@ DroidMind OS is a privacy-first, local AI enhancement layer for Android 12+. It 
 ## 🚀 Key Features
 - **Encrypted Storage:** Room DB protected by SQLCipher.
 - **Hardware Security:** Android Keystore AES/GCM encryption.
-- **Local VPN:** AdBlockerX module for DNS-level domain filtering.
+- **Local VPN:** AdShield module for DNS-level domain filtering.
 - **AI Engine:** On-device inference via TFLite (Usage, Anomaly, LLM).
 - **Deep Integration:** Accessibility & Context services for adaptive behavior.
 - **OTA Updates:** Integrated in-app update system.

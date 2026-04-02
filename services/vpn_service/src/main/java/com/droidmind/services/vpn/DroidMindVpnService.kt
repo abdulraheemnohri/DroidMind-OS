@@ -3,7 +3,7 @@ package com.droidmind.services.vpn
 import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
-import com.droidmind.modules.adblockerx.AdBlockerX
+import com.droidmind.modules.adshield.AdShield
 import com.droidmind.database.AdLogDao
 import com.droidmind.database.AdLog
 import dagger.hilt.android.AndroidEntryPoint
@@ -16,11 +16,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
+/**
+ * DroidMind OS VPN Service.
+ *
+ * Functional Overview:
+ * This service operates as a DNS-filtering local proxy. It intercepts UDP packets on port 53 (DNS),
+ * parses the domain name using [extractDomain], and checks it against the [AdShield] module.
+ *
+ * In this blueprint version, packets are looped back to the TUN interface to allow regular
+ * OS networking to continue while blocking specifically identified DNS domains by dropping
+ * their request packets.
+ *
+ * Note: For production-grade full traffic redirection, a native userspace TCP/IP stack (like lwIP)
+ * must be integrated to forward packets between the TUN interface and real network sockets.
+ */
 @AndroidEntryPoint
 class DroidMindVpnService : VpnService(), Runnable {
     private var vpnInterface: ParcelFileDescriptor? = null
     private var vpnThread: Thread? = null
-    private val adBlocker = AdBlockerX()
+    private val adBlocker = AdShield()
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     @Inject
@@ -37,6 +51,7 @@ class DroidMindVpnService : VpnService(), Runnable {
 
     private fun loadBlockingData() {
         try {
+            // Load the ad hosts list from the assets directory.
             assets.open("ad_hosts.txt").use { input ->
                 adBlocker.loadHosts(input)
             }
@@ -53,6 +68,7 @@ class DroidMindVpnService : VpnService(), Runnable {
 
     override fun run() {
         try {
+            // Establish the VPN interface.
             vpnInterface = Builder()
                 .setSession("DroidMindVPN")
                 .addAddress("10.0.0.2", 32)
@@ -67,18 +83,20 @@ class DroidMindVpnService : VpnService(), Runnable {
             while (!Thread.interrupted()) {
                 val length = inputStream.read(packet.array())
                 if (length > 0) {
-                    // NOTE: This is a blueprint implementation.
-                    // For production, packets must be forwarded to a backend socket.
-
+                    // Check if it's a DNS packet
                     if (isDnsPacket(packet, length)) {
                         val domain = extractDomain(packet, length)
                         if (domain != null && adBlocker.isDomainBlocked(domain)) {
+                            // Logic: If blocked, we "consume" the packet here and do NOT write it back.
+                            // The requesting app will experience a DNS timeout for this domain.
                             logBlockedAd(domain)
                             packet.clear()
-                            continue // Drop blocked DNS query
+                            continue
                         }
                     }
 
+                    // Blueprint: Write the packet back to allow OS to process non-blocked traffic.
+                    // This creates a loopback for demonstration.
                     outputStream.write(packet.array(), 0, length)
                     packet.clear()
                 }
@@ -100,7 +118,8 @@ class DroidMindVpnService : VpnService(), Runnable {
 
     private fun extractDomain(packet: ByteBuffer, length: Int): String? {
         try {
-            var pos = 28 + 12 // Skip IP/UDP headers and DNS fixed header
+            // Simple DNS QNAME parser
+            var pos = 28 + 12 // Skip IP/UDP headers (28 bytes) and DNS fixed header (12 bytes)
             val domain = StringBuilder()
 
             while (pos < length) {
@@ -121,7 +140,7 @@ class DroidMindVpnService : VpnService(), Runnable {
 
     private fun logBlockedAd(domain: String) {
         serviceScope.launch {
-            adLogDao.insertLog(AdLog(domain = domain, appName = "System-wide"))
+            adLogDao.insertLog(AdLog(domain = domain, appName = "AdShield"))
         }
     }
 }

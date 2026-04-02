@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.droidmind.modules.adblockerx"
+    namespace = "com.droidmind.modules.adshield"
     compileSdk = 34
 
     defaultConfig {
