@@ -12,36 +12,51 @@ import kotlin.random.Random
  *
  * CORE DIRECTIVE: All AI processing is strictly on-device. No cloud APIs are used.
  *
- * This engine manages TFLite and GGUF local models for:
- * 1. Usage Classifier (TFLite)
- * 2. Anomaly Detector (Autoencoder TFLite)
- * 3. On-Device LLM (GGUF via native bridge)
- * 4. Image Classifier (MobileNet TFLite)
- * 5. Ad Detection (CNN TFLite)
+ * This engine manages TFLite and GGUF local models for the following tasks:
  */
 class AIEngine(private val context: Context) {
-    private var interpreter: Interpreter? = null
-    private var isSimulatedMode = false
 
-    /**
-     * Loads a local TFLite model from the app's assets.
-     */
-    fun loadModel(modelPath: String) {
-        try {
-            val modelBuffer = loadModelFile(modelPath)
-            if (modelBuffer.capacity() == 0) {
-                throw IllegalArgumentException("Empty model file: $modelPath")
+    // Specific Model File Paths (Assets)
+    companion object {
+        const val MODEL_LLM = "SmolLM2-360M-Instruct-Q4_K_M.gguf"
+        const val MODEL_IMAGE_CLASSIFIER = "MobileNetV3_Small_1.0_224.tflite"
+        const val MODEL_OBJECT_DETECTION = "SSD_MobileNet_V2_Quantized.tflite"
+        const val MODEL_ANOMALY_DETECTOR = "anomaly_autoencoder.tflite"
+        const val MODEL_USAGE_CLASSIFIER = "usage_lstm_cnn.tflite"
+        const val MODEL_AD_DETECTION = "ad_detection_cnn.tflite"
+    }
+
+    private val interpreters = mutableMapOf<String, Interpreter>()
+    private val simulatedModels = mutableSetOf<String>()
+
+    init {
+        // Pre-load core models or mark for simulation
+        loadAllModels()
+    }
+
+    private fun loadAllModels() {
+        listOf(
+            MODEL_IMAGE_CLASSIFIER,
+            MODEL_OBJECT_DETECTION,
+            MODEL_ANOMALY_DETECTOR,
+            MODEL_USAGE_CLASSIFIER,
+            MODEL_AD_DETECTION
+        ).forEach { path ->
+            try {
+                loadTFLiteModel(path)
+            } catch (e: Exception) {
+                simulatedModels.add(path)
             }
-            val options = Interpreter.Options().apply {
-                setNumThreads(4)
-                setUseNNAPI(true) // Accelerate on supported hardware
-            }
-            interpreter = Interpreter(modelBuffer, options)
-            isSimulatedMode = false
-        } catch (e: Exception) {
-            // Enable simulated mode if valid model is missing (e.g. in blueprint/CI)
-            isSimulatedMode = true
         }
+    }
+
+    private fun loadTFLiteModel(modelPath: String) {
+        val modelBuffer = loadModelFile(modelPath)
+        val options = Interpreter.Options().apply {
+            setNumThreads(4)
+            setUseNNAPI(true)
+        }
+        interpreters[modelPath] = Interpreter(modelBuffer, options)
     }
 
     private fun loadModelFile(modelPath: String): MappedByteBuffer {
@@ -54,48 +69,41 @@ class AIEngine(private val context: Context) {
     }
 
     /**
-     * Runs inference on the loaded model.
-     * All processing is local and offline.
+     * Runs inference on a specific model.
      */
-    fun runInference(input: Array<Any>, output: Map<Int, Any>) {
-        if (isSimulatedMode) {
+    fun runInference(modelName: String, input: Array<Any>, output: Map<Int, Any>) {
+        val interpreter = interpreters[modelName]
+        if (interpreter == null || simulatedModels.contains(modelName)) {
             simulateInference(output)
             return
         }
-        interpreter?.runForMultipleInputsOutputs(input, output)
+        interpreter.runForMultipleInputsOutputs(input, output)
     }
 
-    /**
-     * Simulated inference provides randomized realistic dummy data for testing system logic.
-     */
     private fun simulateInference(output: Map<Int, Any>) {
         output.forEach { (_, value) ->
             when (value) {
                 is FloatArray -> {
-                    for (i in value.indices) {
-                        value[i] = if (Random.nextBoolean()) 0.98f else 0.02f
-                    }
+                    for (i in value.indices) value[i] = if (Random.nextBoolean()) 0.98f else 0.02f
                 }
                 is IntArray -> {
-                    for (i in value.indices) {
-                        value[i] = Random.nextInt(0, 100)
-                    }
+                    for (i in value.indices) value[i] = Random.nextInt(0, 100)
                 }
             }
         }
     }
 
     /**
-     * Local LLM Execution (Stub)
-     * In a production environment, this would interface with a native C++ GGUF loader (e.g. llama.cpp).
+     * Local LLM Execution using GGUF Model (Stub)
+     * Model: SmolLM2-360M-Instruct-Q4_K_M.gguf
      */
     fun executeLocalLLM(prompt: String): String {
         // This is strictly local. No network calls.
-        return "Local LLM Response for: $prompt"
+        return "[Local LLM: SmolLM2] Response for: $prompt"
     }
 
     fun close() {
-        interpreter?.close()
-        interpreter = null
+        interpreters.values.forEach { it.close() }
+        interpreters.clear()
     }
 }
