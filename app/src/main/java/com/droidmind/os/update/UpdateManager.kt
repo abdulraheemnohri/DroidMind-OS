@@ -34,6 +34,8 @@ class UpdateManager(private val context: Context) {
             val url = URL(updateUrl)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
             connection.connect()
 
             if (connection.responseCode == 200) {
@@ -53,7 +55,7 @@ class UpdateManager(private val context: Context) {
                 } else null
             } else null
         } catch (e: Exception) {
-            e.printStackTrace()
+            // Log error or handle silently for blueprint
             null
         }
     }
