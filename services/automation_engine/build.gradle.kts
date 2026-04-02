@@ -22,5 +22,6 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:ai_engine"))
     implementation(libs.androidx.core.ktx)
 }
