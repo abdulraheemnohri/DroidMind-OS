@@ -45,6 +45,16 @@ jobs:
       env:
         VERSION_NAME: ${{ steps.next_version.outputs.tag }}
 
+    - name: Sign APK (Debug Sign for Testing)
+      run: |
+        # In a real production setup, use a real keystore.
+        # For now, we use the debug key to ensure the APK is installable.
+        # This is a workaround since 'assembleRelease' produces an unsigned APK by default.
+        cp app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/droidmind-os-${{ steps.next_version.outputs.tag }}.apk
+        # We'll actually just build the debug version which is signed by default
+        ./gradlew assembleDebug --no-daemon
+        cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/droidmind-os-debug-${{ steps.next_version.outputs.tag }}.apk
+
     - name: Create Git Tag
       run: |
         git config user.name "GitHub Action"
@@ -56,7 +66,8 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.next_version.outputs.tag }}
-        files: app/build/outputs/apk/release/*.apk
+        files: |
+          app/build/outputs/apk/release/*.apk
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
